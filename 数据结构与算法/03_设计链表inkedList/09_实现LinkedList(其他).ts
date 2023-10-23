@@ -56,6 +56,7 @@ class LinkedList<T> {
       current = current.next;
     }
     console.log(values.join("->"));
+    return values;
   }
 
   // 插入方法
