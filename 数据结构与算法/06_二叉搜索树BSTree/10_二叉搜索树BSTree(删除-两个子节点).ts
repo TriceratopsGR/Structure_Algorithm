@@ -274,15 +274,7 @@ class BSTree<T> {
     if (!current) return false;
 
     // 2. 获取到三个东西： 当前节点/ 父节点/ 是属于父节点的左子节点，还是右子节点
-
-    console.log(
-      "当前节点：",
-      current?.value,
-      "父节点：",
-      current?.parent?.value
-    );
-
-    // 3. 如果删除的是叶子节点  没有子节点
+    // 2. 如果删除的是叶子节点  没有子节点
     if (current.left === null && current.right === null) {
       // 左右都没有节点
       if (current === this.root) {

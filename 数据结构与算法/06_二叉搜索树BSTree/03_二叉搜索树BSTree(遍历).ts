@@ -155,6 +155,7 @@ class BSTree<T> {
     //3. 遍历队列中所有的节点 依次出队
     while (queue.length) {
       // 3.1 访问节点的过程
+      //  出队操作，从队列头部取出一个节点 current 进行处理
       const current = queue.shift()!;
       console.log(current.value);
 
@@ -187,17 +188,19 @@ bst.insert(14);
 bst.insert(20);
 bst.insert(18);
 bst.insert(25);
-bst.insert(6);
+// bst.insert(6);
 
 // 打印
 // btPrint(bst.root);
 
 bst.print();
-// bst.preOrderTraverse();
+// 先序遍历
+bst.preOrderTraverse();
+// 中序遍历
 // bst.inOrderTraverse();
-
+// 后序遍历
 // bst.postOrderTraverse();
-
-bst.levelOrderTraverse();
+// 层序遍历
+// bst.levelOrderTraverse();
 
 export {};

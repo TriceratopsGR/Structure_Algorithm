@@ -13,7 +13,10 @@ class BSTree<T> {
     btPrint(this.root);
   }
 
-  /** 插入数据的操作 */
+  /**
+   * 插入数据的操作
+   * @param value 插入的值
+   */
   insert(value: T) {
     // 1. 根据传入的value 创建一个 node(TreeNode) 节点
     const newNode = new TreeNode(value);

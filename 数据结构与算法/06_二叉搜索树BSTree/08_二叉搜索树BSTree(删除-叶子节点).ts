@@ -272,6 +272,7 @@ class BSTree<T> {
       }
     }
     // 3. 只有一个子节点： 只有左子节点
+    // ps: 我的父节点 指向 我的子节点
     else if (current.right === null) {
       if (current === this.root) {
         this.root = current.left;

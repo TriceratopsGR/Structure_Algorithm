@@ -11,7 +11,6 @@ class TreeNode<T> extends Node<T> {
   // 判断当前节点是父节点的左子节点
   get isLeft(): boolean {
     // 啊 不理解家人们
-    // this 指向是否一致，来判断再父节点
     return !!(this.parent && this.parent.left === this);
   }
 
@@ -35,7 +34,6 @@ class BSTree<T> {
       if (current.value === value) {
         return current;
       }
-      // 向下寻找
       parent = current;
       if (current.value < value) {
         current = current.right;
@@ -62,7 +60,11 @@ class BSTree<T> {
     }
   }
 
-  // 递归
+  /**
+   *  递归
+   * @param node
+   * @param newNode
+   */
   private insertNode(node: TreeNode<T>, newNode: TreeNode<T>) {
     // 小左 大右
     if (newNode.value < node.value) {
@@ -246,7 +248,29 @@ class BSTree<T> {
     }
   }
 
-  /** 删除 */
+  /** 删除*/
+  // 后继节点
+  private getSuccessor(delNode: TreeNode<T>): TreeNode<T> {
+    // 获取右子树
+    let current = delNode.right;
+    let successor: TreeNode<T> | null = null;
+    while (current) {
+      successor = current;
+      current = current.left;
+      if (current) {
+        current.parent = successor;
+      }
+    }
+    // 找到后继节点
+    console.log("删除节点：", delNode.value, "后继节点：", successor?.value);
+    if (successor !== delNode.right) {
+      successor!.parent!.left = successor!.right ?? null;
+      successor!.right = delNode.right;
+    }
+    // 一定要进行的操作: 将删除节点的left, 赋值给successor.left
+    successor!.left = delNode.left;
+    return successor!;
+  }
 
   remove(value: T): boolean {
     //1. 先去搜索是否有这个值
@@ -254,17 +278,28 @@ class BSTree<T> {
     if (!current) return false;
 
     // 2. 获取到三个东西： 当前节点/ 父节点/ 是属于父节点的左子节点，还是右子节点
-
-    console.log(
-      "当前节点：",
-      current?.value,
-      "父节点：",
-      current?.parent?.value
-    );
-    if (current.isLeft) {
-      //这就说明 current在父节点的左边
+    let replaceNode: TreeNode<T> | null = null; // 拿到要替换的节点
+    if (current.left === null && current.right === null) {
+      // 2. 如果删除的是叶子节点  没有子节点'
+      replaceNode = null;
+    } else if (current.right === null) {
+      // 3. 只有一个子节点： 只有左子节点
+      replaceNode = current.left;
+    } else if (current.left === null) {
+      // 4. 只有一个子节点： 只有左子节点
+      replaceNode = current.right;
     } else {
-      // 在父节点的右边
+      // 5. 有两个子节点
+      const cuccessor = this.getSuccessor(current); // 后继节点
+      replaceNode = cuccessor;
+    }
+
+    if (current === this.root) {
+      this.root = replaceNode;
+    } else if (current.isLeft) {
+      current.parent!.left = replaceNode;
+    } else {
+      current.parent!.right = replaceNode;
     }
 
     return true;
@@ -289,20 +324,19 @@ bst.insert(18);
 bst.insert(25);
 bst.insert(6);
 
-// 打印
-bst.print();
 // bst.preOrderTraverse();
 // bst.inOrderTraverse();
 // bst.postOrderTraverse();
 // bst.levelOrderTraverse();
 // console.log(bst.getMaxValue());
 // console.log(bst.getMinValue());
+bst.print();
 
-// console.log(bst.search(18));
-// console.log(bst.search(4));
-console.log(bst.remove(11));
-console.log(bst.remove(6));
-console.log(bst.remove(3));
-console.log(bst.remove(9));
-
+// bst.remove(11);
+bst.remove(11);
+bst.print();
+bst.remove(15);
+bst.print();
+bst.remove(9);
+bst.print();
 export {};
