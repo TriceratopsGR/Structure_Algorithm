@@ -1,21 +1,15 @@
 import ILinkedList from "./ILinkedList";
-
-// 1. 创建Node 节点类
-class Node<T> {
-  value: T;
-  next: Node<T> | null = null;
-  constructor(value: T) {
-    this.value = value;
-    this.next = null;
-  }
-}
+import { Node } from "./LinkedNode";
 
 // 2. 创建LinkedList类
-class LinkedList<T> implements ILinkedList<T> {
+export default class LinkedList<T> implements ILinkedList<T> {
+  // protected 外界还是不能访问我得，但是子类可以访问
   // head 要指向下一个node 节点
-  private head: Node<T> | null = null;
+  protected head: Node<T> | null = null;
   // 记录几个节点了
-  private length: number = 0;
+  protected length: number = 0;
+  // 总是执行链表的尾部
+  protected tail: Node<T> | null = null;
 
   size() {
     return this.length;
@@ -34,7 +28,16 @@ class LinkedList<T> implements ILinkedList<T> {
     // 返回的是当前需要的节点1
     return current;
   }
-  // 添加节点
+
+  // 判断是否为最后一个节点
+  private isTail(node: Node<T>): boolean {
+    return this.tail === node;
+  }
+
+  /**
+   * 添加节点
+   * @param value
+   */
   append(value: T) {
     // 1. 根据value 创建一个新节点
     const newNode = new Node(value);
@@ -43,29 +46,42 @@ class LinkedList<T> implements ILinkedList<T> {
     if (!this.head) {
       this.head = newNode;
     } else {
-      let current = this.head;
-      while (current.next) {
-        current = current.next;
-      }
-      // current 肯定是指向最后一个节点的
-      current.next = newNode;
+      // 直接将尾部节点指向新增的接口
+      this.tail!.next = newNode;
     }
+
+    // 更换尾部节点
+    this.tail = newNode;
     this.length++;
   }
 
-  // 遍历列表
+  /**
+   * 遍历列表
+   */
   traverse() {
     const values: T[] = [];
     let current = this.head;
     while (current) {
       values.push(current.value);
-      current = current.next;
+      if (this.isTail(current)) {
+        current = null;
+      } else {
+        current = current.next;
+      }
+    }
+    // 循环链表需要这个代码
+    if (this.head && this.tail?.next === this.head) {
+      values.push(this.head.value);
     }
     console.log(values.join("->"));
   }
 
-  // 插入方法
-  // 要判断边界值
+  /**
+   * 插入方法  -> 要判断边界值
+   * @param value
+   * @param position
+   * @returns
+   */
   insert(value: T, position: number): boolean {
     // 1. 判断越界值
     if (position < 0 || position > this.length) return false;
@@ -82,18 +98,25 @@ class LinkedList<T> implements ILinkedList<T> {
     } else {
       // 拿前一个节点
       const previous = this.getNode(position - 1);
-
       // 拼接后面的节点
       newNode.next = previous?.next ?? null;
       // !断言 一定有值
       previous!.next = newNode;
+      // 如果插入是尾部 就要替换尾部节点
+      if (position === this.length) {
+        this.tail = newNode;
+      }
     }
     this.length++;
 
     return true;
   }
 
-  // 删除方法：
+  /**
+   * 删除方法
+   * @param position
+   * @returns
+   */
   removeAt(position: number): T | null {
     // 1. 越界判断
     if (position < 0 || position >= this.length) return null;
@@ -102,26 +125,33 @@ class LinkedList<T> implements ILinkedList<T> {
     let current = this.head;
     if (position === 0) {
       this.head = current?.next ?? null;
+      // 删除只有一个节点的时候
+      if (this.length === 1) {
+        this.tail = null;
+      }
     } else {
-      // 重构代码
       // 拿上一个节点
       const previous = this.getNode(position - 1);
-
       // 需要给current 重新赋值
       current = previous?.next || null;
-
       // 找到需要的节点了
       // 跳过 需要删除的节点 秒啊
       previous!.next = previous?.next?.next ?? null;
+      if (position === this.length - 1) {
+        this.tail = previous;
+      }
     }
 
     this.length--;
     return current?.value ?? null;
   }
-
+  /**
+   * 删除方法
+   * @param value
+   * @returns value
+   */
   remove(value: T): T | null {
     const index = this.indexOf(value);
-    this.length--;
     return this.removeAt(index);
   }
 
@@ -134,7 +164,12 @@ class LinkedList<T> implements ILinkedList<T> {
     return this.getNode(position)?.value || null;
   }
 
-  // 更新方法
+  /**
+   * 更新方法
+   * @param value
+   * @param position
+   * @returns
+   */
   update(value: T, position: number): boolean {
     if (position < 0 || position >= this.length) return false;
     // 获取对应的节点直接更新 即可
@@ -143,7 +178,11 @@ class LinkedList<T> implements ILinkedList<T> {
     return true;
   }
 
-  // 根据值 获取对应的索引 indxOf
+  /**
+   * 根据值 获取对应的索引 indxOf
+   * @param value
+   * @returns
+   */
   indexOf(value: T): number {
     let current = this.head;
     let index = 0;
@@ -151,44 +190,52 @@ class LinkedList<T> implements ILinkedList<T> {
       if (current.value === value) {
         return index;
       }
+      // 判断是否为最后一个节点
+      if (this.isTail(current)) {
+        current = null;
+      } else {
+        current = current.next;
+      }
       index++;
-      current = current.next;
     }
 
     return -1;
   }
 
-  // 判断链表是否为空
+  /**
+   * 判断链表是否为空
+   * @returns boolean
+   */
   isEmpty() {
     return this.length === 0;
   }
 }
 
-const linkedList = new LinkedList<string>();
-console.log("------------ 测试append ------------");
-linkedList.append("aaa");
-linkedList.append("bbb");
-linkedList.append("ccc");
-linkedList.append("ddd");
-linkedList.traverse();
+// const linkedList = new LinkedList<string>();
+// console.log("------------ 测试append ------------");
+// linkedList.append("aaa");
+// linkedList.append("bbb");
+// linkedList.append("ccc");
+// linkedList.append("ddd");
+// linkedList.traverse();
 
-console.log("------------ 测试insert ------------");
-linkedList.insert("abc", 0);
-linkedList.traverse();
-linkedList.insert("cba", 2);
-linkedList.insert("nba", 6);
-linkedList.traverse();
+// console.log("------------ 测试insert ------------");
+// linkedList.insert("abc", 0);
+// linkedList.traverse();
+// linkedList.insert("cba", 2);
+// linkedList.insert("nba", 6);
+// linkedList.traverse();
 
-// 测试删除节点
-console.log("------------ 测试removeAt ------------");
-linkedList.removeAt(0);
-linkedList.removeAt(0);
-linkedList.traverse();
+// // 测试删除节点
+// console.log("------------ 测试removeAt ------------");
+// linkedList.removeAt(0);
+// linkedList.removeAt(0);
+// linkedList.traverse();
 
-console.log(linkedList.removeAt(2));
-linkedList.traverse();
-console.log(linkedList.removeAt(3));
-linkedList.traverse();
+// console.log(linkedList.removeAt(2));
+// linkedList.traverse();
+// console.log(linkedList.removeAt(3));
+// linkedList.traverse();
 
 // console.log("------------ 测试get ------------");
 // console.log(linkedList.get(0));
