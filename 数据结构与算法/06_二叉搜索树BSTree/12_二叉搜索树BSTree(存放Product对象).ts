@@ -24,7 +24,7 @@ class TreeNode<T> extends Node<T> implements PrintableNode {
   }
 
   get value() {
-    const data = this.data as Product;
+    const data = this.data as unknown as Product;
     return `${data.name} - ${data.price}`;
   }
 }
@@ -347,6 +347,10 @@ const p5 = new Product("vivo", 1200);
 const p6 = new Product("meizu", 1799);
 
 const bst = new BSTree<Product>();
+
+// const bst = new BSTree<Product>((c1, c2) => {
+//   return c1.price - c2.price;
+// });
 
 bst.insert(p1);
 bst.insert(p2);

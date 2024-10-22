@@ -63,13 +63,18 @@ export default class LinkedList<T> implements ILinkedList<T> {
     let current = this.head;
     while (current) {
       values.push(current.value);
+      // 已经遍历到最后一个节点了
       if (this.isTail(current)) {
         current = null;
       } else {
         current = current.next;
       }
     }
+
     // 循环链表需要这个代码
+    // aaa->bbb->ccc->ddd->eee
+    // 列表已经循环完毕，然后push 第一个节点
+    // aaa->bbb->ccc->ddd->eee->aaa
     if (this.head && this.tail?.next === this.head) {
       values.push(this.head.value);
     }

@@ -71,7 +71,7 @@ console.log(clinkedList.indexOf("kkk"));
 console.log(clinkedList.indexOf("yyy"));
 clinkedList.traverse();
 
-console.log("------------ 测试indexOf ------------");
+console.log("------------ 测试remove ------------");
 console.log(clinkedList.remove("yyy"));
 console.log(clinkedList.remove("kkk"));
 clinkedList.append("eee");
